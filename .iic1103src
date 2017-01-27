@@ -1,0 +1,7 @@
+[user]
+username: yourusername
+token: *********
+
+[iic1103]
+loginurl: http://localhost:3000/login
+submissionurl: http://localhost:3000/submit

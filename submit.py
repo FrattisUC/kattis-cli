@@ -9,6 +9,9 @@ import webbrowser
 import requests
 import requests.exceptions
 
+session = requests.Session()
+adapter = requests.adapters.HTTPAdapter(max_retries = 20)
+session.mount('http://', adapter)
 
 # Python 2/3 compatibility
 if sys.version_info[0] >= 3:
@@ -19,7 +22,7 @@ else:
 
 # End Python 2/3 compatibility
 
-_DEFAULT_CONFIG = '/usr/local/etc/kattisrc'
+_DEFAULT_CONFIG = '/usr/local/etc/iic1103src'
 _VERSION = 'Version: $Version: $'
 _LANGUAGE_GUESS = {
     '.java': 'Java',
@@ -43,7 +46,7 @@ _LANGUAGE_GUESS = {
 _GUESS_MAINCLASS = {'Java', 'Python'}
 
 
-_HEADERS = {'User-Agent': 'kattis-cli-submit'}
+_HEADERS = {'User-Agent': 'iic1103-cli-submit'}
 
 
 class ConfigError(Exception):
@@ -51,39 +54,39 @@ class ConfigError(Exception):
 
 
 def get_url(cfg, option, default):
-    if cfg.has_option('kattis', option):
-        return cfg.get('kattis', option)
+    if cfg.has_option('iic1103', option):
+        return cfg.get('iic1103', option)
     else:
-        return 'https://%s/%s' % (cfg.get('kattis', 'hostname'), default)
+        return 'https://%s/%s' % (cfg.get('iic1103', 'hostname'), default)
 
 
 def get_config():
-    """Returns a ConfigParser object for the .kattisrc file(s)
+    """Returns a ConfigParser object for the .iic1103src file(s)
     """
     cfg = configparser.ConfigParser()
     if os.path.exists(_DEFAULT_CONFIG):
         cfg.read(_DEFAULT_CONFIG)
 
-    if not cfg.read([os.path.join(os.getenv('HOME'), '.kattisrc'),
-                     os.path.join(os.path.dirname(sys.argv[0]), '.kattisrc')]):
+    if not cfg.read([os.path.join(os.getenv('HOME'), '.iic1103src'),
+                     os.path.join(os.path.dirname(sys.argv[0]), '.iic1103src')]):
         raise ConfigError('''\
 I failed to read in a config file from your home directory or from the
-same directory as this script. Please go to your Kattis installation
-to download a .kattisrc file.
+same directory as this script. Please go to your iic1103 installation
+to download a .iic1103src file.
 
 The file should look something like this:
 [user]
 username: yourusername
 token: *********
 
-[kattis]
-loginurl: https://<kattis>/login
-submissionurl: https://<kattis>/submit''')
+[iic1103]
+loginurl: https://<iic1103>/login
+submissionurl: https://<iic1103>/submit''')
     return cfg
 
 
 def login(login_url, username, password=None, token=None):
-    """Log in to Kattis.
+    """Log in to iic1103.
 
     At least one of password or token needs to be provided.
 
@@ -95,11 +98,11 @@ def login(login_url, username, password=None, token=None):
     if token:
         login_args['token'] = token
 
-    return requests.post(login_url, data=login_args, headers=_HEADERS)
+    return session.post(login_url, data=login_args, headers=_HEADERS)
 
 
 def login_from_config(cfg):
-    """Log in to Kattis using the access information in a kattisrc file
+    """Log in to iic1103 using the access information in a iic1103src file
 
     Returns a requests.Response with cookies needed to be able to submit
     """
@@ -115,10 +118,10 @@ def login_from_config(cfg):
         pass
     if password is None and token is None:
         raise ConfigError('''\
-Your .kattisrc file appears corrupted. It must provide a token (or a
-KATTIS password).
+Your .iic1103src file appears corrupted. It must provide a token (or a
+iic1103 password).
 
-Please download a new .kattisrc file''')
+Please download a new .iic1103src file''')
 
     loginurl = get_url(cfg, 'loginurl', 'login')
     return login(loginurl, username, password, token)
@@ -149,7 +152,7 @@ def submit(submit_url, cookies, problem, language, files, mainclass='', tag=''):
                                sub_file.read(),
                                'application/octet-stream')))
 
-    return requests.post(submit_url, data=data, files=sub_files, cookies=cookies, headers=_HEADERS)
+    return session.post(submit_url, data=data, files=sub_files, cookies=cookies, headers=_HEADERS)
 
 
 def confirm_or_die(problem, language, files, mainclass, tag):
@@ -179,7 +182,7 @@ def open_submission(submit_response, cfg):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Submit a solution to Kattis')
+    parser = argparse.ArgumentParser(description='Submit a solution to iic1103')
     parser.add_argument('-p', '--problem',
                    help=''''Which problem to submit to.
 Overrides default guess (first part of first filename)''')
@@ -226,7 +229,7 @@ Overrides default guess (based on suffix of first filename)''')
             pass
 
         if python_version not in ['2', '3']:
-            print('python-version in .kattisrc must be 2 or 3')
+            print('python-version in .iic1103src must be 2 or 3')
             sys.exit(1)
         language = 'Python ' + python_version
 
