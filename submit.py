@@ -143,7 +143,7 @@ def submit(submit_url, cookies, problem, language, files, mainclass='', tag=''):
             'problem': problem,
             'tag': tag,
             'script': 'true'}
-
+    _HEADERS = {'problem': problem}
     sub_files = []
     for f in files:
         with open(f) as sub_file:
