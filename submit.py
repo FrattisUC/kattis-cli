@@ -53,6 +53,24 @@ class ConfigError(Exception):
     pass
 
 
+def parseResults(results):
+    print("+-----------------------------+")
+    s = ""
+    for str in results:
+        str = str.replace("\"", "")
+        s+=str
+
+    s = s.replace("[", "")
+    s = s.replace("]", "")
+    results = s.split(',')
+
+    for str in results:
+        while(str and  str[0] == " "):
+            str = str.strip()
+        print(str)
+
+    print("+-----------------------------+")
+
 def get_url(cfg, option, default):
     if cfg.has_option('iic1103', option):
         return cfg.get('iic1103', option)
@@ -287,8 +305,11 @@ extension "%s"''' % (ext,))
             print('Status code:', login_reply.status_code)
         sys.exit(1)
 
+    # TODO: Decode results to readable thing
+    parseResults(result)
+
     plain_result = result.content.decode('utf-8').replace('<br />', '\n')
-    print(plain_result)
+    #print(plain_result)
 
     try:
         open_submission(plain_result, cfg)
