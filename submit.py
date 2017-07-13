@@ -169,8 +169,8 @@ def submit(submit_url, cookies, problem, language, files, mainclass='', tag=''):
                               (os.path.basename(f),
                                sub_file.read(),
                                'application/octet-stream')))
-
-    return session.post(submit_url, data=data, files=sub_files, cookies=cookies, headers=_HEADERS)
+    return session.post(submit_url, data=data, files=sub_files, headers=_HEADERS)
+    #return session.post(submit_url, data=data, files=sub_files, cookies=cookies, headers=_HEADERS)
 
 
 def confirm_or_die(problem, language, files, mainclass, tag):
@@ -226,9 +226,9 @@ Overrides default guess (based on suffix of first filename)''')
         print(exc)
         sys.exit(1)
 
-    problem, ext = os.path.splitext(os.path.basename(args.files[0]))
+    submission_name, ext = os.path.splitext(os.path.basename(args.files[0]))
     language = _LANGUAGE_GUESS.get(ext, None)
-    mainclass = problem if language in _GUESS_MAINCLASS else None
+    mainclass = submission_name if language in _GUESS_MAINCLASS else None
     tag = args.tag
 
     if args.problem:
